@@ -245,6 +245,20 @@ def listar_contas(contas: List[Dict]):
         print(f"Agência: {conta['agencia']} | Conta: {conta['numero']:04d} | Titular: {usuario['nome']} | CPF: {usuario['cpf']}")
     print()
 
+# Desafio
+# Com os novos conhecimentos adquiridos sobre decoradores, geradores e iteradores
+# você foi encarregado de implementar as seguintes funcionalidades no sistema:
+# - Decorador de log
+# - Gerador de relatórios
+# - Iterador personalizado
+
+# Decorador de log
+# Implemente um decorador que seja aplicado a todas as funções de
+# transações (depósito, saque, criação de conta, etc). Esse decorador
+# deve registrar (printar) a data e hora de cada transação, bem como o tipo de transação
+
+
+
 def main():
     saldo = 0.0
     limite = 500.0
