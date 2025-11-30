@@ -145,18 +145,24 @@ MENU = """
 AGENCIA_PADRAO = "0001"
 LIMITE_SAQUES = 3
 
-def depositar(saldo, valor, extrato, /):
-    """Depósito: argumentos apenas por posição."""
+
+@log_transacao
+def depositar(saldo: float, valor: float, transacoes: List[Dict], /):
     if valor > 0:
         saldo += valor
-        extrato += f"Depósito: R$ {valor:.2f}\n"
+        transacoes.append({
+            "tipo": "Depósito",
+            "valor": valor,
+            "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        })
         print("Depósito realizado com sucesso!")
     else:
         print("Operação falhou! O valor informado é inválido.")
-    return saldo, extrato
+    return saldo
 
-def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
-    """Saque: argumentos apenas por nome."""
+
+@log_transacao
+def sacar(*, saldo: float, valor: float, transacoes: List[Dict], limite: float, numero_saques: int, limite_saques: int):
     excedeu_saldo = valor > saldo
     excedeu_limite = valor > limite
     excedeu_saques = numero_saques >= limite_saques
@@ -169,23 +175,40 @@ def sacar(*, saldo, valor, extrato, limite, numero_saques, limite_saques):
         print("Operação falhou! Número máximo de saques excedido.")
     elif valor > 0:
         saldo -= valor
-        extrato += f"Saque:    R$ {valor:.2f}\n"
+        transacoes.append({
+            "tipo": "Saque",
+            "valor": valor,
+            "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        })
         numero_saques += 1
         print("Saque realizado com sucesso!")
     else:
         print("Operação falhou! O valor informado é inválido.")
 
-    return saldo, extrato, numero_saques
+    return saldo, numero_saques
 
-def exibir_extrato(saldo, /, *, extrato):
-    """Extrato: saldo por posição; extrato por nome."""
+
+@log_transacao
+def exibir_extrato(saldo, /, *, transacoes):
+    """
+    Utiliza o Gerador para exibir o extrato.
+    """
     print("\n================ EXTRATO ================")
-    print("Não foram realizadas movimentações." if not extrato else extrato, end="")
-    print(f"Saldo:    R$ {saldo:.2f}")
+    tem_transacao = False
+    for transacao in gerador_relatorios(transacoes):
+        tem_transacao = True
+        print(f"{transacao['data']} - {transacao['tipo']}:\tR$ {transacao['valor']:.2f}")
+
+    if not tem_transacao:
+        print("Não foram realizadas movimentações.")
+
+    print(f"\nSaldo:\t\tR$ {saldo:.2f}")
     print("=========================================\n")
+
 
 def normalizar_cpf(cpf: str) -> str:
     return "".join(ch for ch in cpf if ch.isdigit())
+
 
 def buscar_usuario_por_cpf(usuarios: List[Dict], cpf: str):
     cpf = normalizar_cpf(cpf)
@@ -194,9 +217,11 @@ def buscar_usuario_por_cpf(usuarios: List[Dict], cpf: str):
             return usuario
     return None
 
+
+@log_transacao
 def criar_usuario(usuarios: List[Dict]):
     print("\n=== Cadastro de Usuário ===")
-    cpf = normalizar_cpf(input("CPF (somente números ou em qualquer formato): ").strip())
+    cpf = normalizar_cpf(input("CPF (somente números): ").strip())
     if not cpf:
         print("CPF inválido.")
         return
@@ -207,42 +232,42 @@ def criar_usuario(usuarios: List[Dict]):
         return
 
     nome = input("Nome completo: ").strip()
+    endereco = input("Endereço completo (Logradouro, nro - Bairro - Cidade/UF): ").strip()
     data_nascimento = input("Data de nascimento (DD/MM/AAAA): ").strip()
-    logradouro = input("Logradouro: ").strip()
-    numero = input("Número: ").strip()
-    bairro = input("Bairro: ").strip()
-    cidade = input("Cidade: ").strip()
-    uf = input("UF: ").strip().upper()
 
-    endereco = f"{logradouro}, {numero} - {bairro} - {cidade}/{uf}"
     usuarios.append({
         "nome": nome,
         "data_nascimento": data_nascimento,
         "cpf": cpf,
         "endereco": endereco
     })
-    print("Usuário criado com sucesso!\n")
+    print("Usuário criado com sucesso!")
 
+
+@log_transacao
 def criar_conta(agencia: str, numero_conta: int, usuarios: List[Dict], contas: List[Dict]):
     print("\n=== Abertura de Conta ===")
     cpf = input("Informe o CPF do usuário: ").strip()
     usuario = buscar_usuario_por_cpf(usuarios, cpf)
 
     if usuario:
-        conta = {"agencia": agencia, "numero": numero_conta, "usuario": usuario}
+        conta = {
+            "agencia": agencia,
+            "numero": numero_conta,
+            "usuario": usuario,
+            "saldo": 0.0,
+            "transacoes": []
+        }
         contas.append(conta)
-        print(f"Conta criada com sucesso! Agência: {agencia}  Conta: {numero_conta:04d}\n")
+        print(f"Conta criada com sucesso! Agência: {agencia}  Conta: {numero_conta:04d}")
     else:
-        print("Usuário não encontrado. Cadastre o usuário antes de criar a conta.\n")
+        print("Usuário não encontrado.")
 
-def listar_contas(contas: List[Dict]):
-    print("\n=== Contas Cadastradas ===")
-    if not contas:
-        print("Não há contas cadastradas.\n")
-        return
-    for conta in contas:
-        usuario = conta["usuario"]
-        print(f"Agência: {conta['agencia']} | Conta: {conta['numero']:04d} | Titular: {usuario['nome']} | CPF: {usuario['cpf']}")
+
+def listar_contas_com_iterador(contas: List[Dict]):
+    print("\n=== Listagem de Contas (Via Iterador) ===")
+    for info_conta in ContaIterador(contas):
+        print(info_conta)
     print()
 
 # Desafio
@@ -266,43 +291,92 @@ def listar_contas(contas: List[Dict]):
 # Implemente um iterador personalizado ContaIterador que permita iterar sobre todas as contas
 # de banco, retornando informações básicas de cada conta (número, saldo atual, etc).
 
-def main():
-    saldo = 0.0
-    limite = 500.0
-    extrato = ""
-    numero_saques = 0
+def log_transacao(func):
+    """
+    Decorador que registra a data, hora e nome da função executada.
+    """
+    @functools.wraps(func)
+    def envelope(*args, **kwargs):
+        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        resultado = func(*args, **kwargs)
+        print(f"\n[LOG] {data_hora} - Função '{func.__name__}' executada.")
+        return resultado
 
+    return envelope
+
+def gerador_relatorios(transacoes: List[Dict], tipo_filtro: str = None) -> Generator:
+    """
+    Gera transações uma a uma, permitindo filtrar por tipo ('saque' ou 'deposito').
+    """
+    for transacao in transacoes:
+        if tipo_filtro is None or transacao['tipo'].lower() == tipo_filtro.lower():
+            yield transacao
+
+class ContaIterador:
+    """
+    Iterador que percorre a lista de contas e retorna informações básicas.
+    """
+
+    def __init__(self, contas: List[Dict]):
+        self.contas = contas
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self._index < len(self.contas):
+            conta = self.contas[self._index]
+            self._index += 1
+            return (f"Agência: {conta['agencia']} | "
+                    f"Conta: {conta['numero']:04d} | "
+                    f"Saldo: R$ {conta['saldo']:.2f} | "
+                    f"Titular: {conta['usuario']['nome']}")
+        raise StopIteration
+
+
+def main():
     usuarios: List[Dict] = []
     contas: List[Dict] = []
+    saldo_sessao = 0.0
+    transacoes_sessao = []
+    numero_saques_sessao = 0
+    limite = 500.0
 
     while True:
         opcao = input(MENU).strip().lower()
 
         if opcao == "d":
             try:
-                valor = float(input("Informe o valor do depósito: ").strip())
+                valor = float(input("Informe o valor do depósito: "))
             except ValueError:
-                print("Entrada inválida.")
+                print("Valor inválido.")
                 continue
-            saldo, extrato = depositar(saldo, valor, extrato)
+
+            saldo_sessao = depositar(saldo_sessao, valor, transacoes_sessao)
+
+            if contas: contas[0]['saldo'] = saldo_sessao
 
         elif opcao == "s":
             try:
-                valor = float(input("Informe o valor do saque: ").strip())
+                valor = float(input("Informe o valor do saque: "))
             except ValueError:
-                print("Entrada inválida.")
+                print("Valor inválido.")
                 continue
-            saldo, extrato, numero_saques = sacar(
-                saldo=saldo,
+
+            saldo_sessao, numero_saques_sessao = sacar(
+                saldo=saldo_sessao,
                 valor=valor,
-                extrato=extrato,
+                transacoes=transacoes_sessao,
                 limite=limite,
-                numero_saques=numero_saques,
+                numero_saques=numero_saques_sessao,
                 limite_saques=LIMITE_SAQUES
             )
 
+            if contas: contas[0]['saldo'] = saldo_sessao
+
         elif opcao == "e":
-            exibir_extrato(saldo, extrato=extrato)
+            exibir_extrato(saldo_sessao, transacoes=transacoes_sessao)
 
         elif opcao == "u":
             criar_usuario(usuarios)
@@ -311,15 +385,32 @@ def main():
             numero_conta = len(contas) + 1
             criar_conta(AGENCIA_PADRAO, numero_conta, usuarios, contas)
 
+            if len(contas) == 1:
+                contas[0]['saldo'] = saldo_sessao
+                contas[0]['transacoes'] = transacoes_sessao
+
         elif opcao == "l":
-            listar_contas(contas)
+            listar_contas_com_iterador(contas)
+
+        elif opcao == "r":
+            print("\n=== Relatório de Movimentações (Gerador) ===")
+            tipo = input("Filtrar por (Saque/Depósito) ou [Enter] para todos: ").strip()
+            filtro = tipo if tipo else None
+
+            gen = gerador_relatorios(transacoes_sessao, filtro)
+            try:
+                for transacao in gen:
+                    print(f"{transacao['data']} - {transacao['tipo']}: R$ {transacao['valor']:.2f}")
+            except Exception as e:
+                print(f"Erro ao gerar relatório: {e}")
+            print()
 
         elif opcao == "q":
-            print("Encerrando. Até mais!")
+            print("Encerrando...")
             break
 
         else:
-            print("Operação inválida. Tente novamente.")
+            print("Operação inválida.")
 
 if __name__ == "__main__":
     main()
