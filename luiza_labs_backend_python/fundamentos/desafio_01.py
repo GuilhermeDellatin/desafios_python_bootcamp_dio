@@ -130,7 +130,9 @@ while True:
 
 # Solução:
 
-from typing import List, Dict
+import functools
+from datetime import datetime
+from typing import List, Dict, Generator
 
 MENU = """
 [d] Depositar
