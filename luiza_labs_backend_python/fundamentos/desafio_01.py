@@ -130,7 +130,6 @@ while True:
 
 # Solução:
 
-import functools
 from datetime import datetime
 from typing import List, Dict, Generator
 from luiza_labs_backend_python.fundamentos.desafio_02 import log_transacao
