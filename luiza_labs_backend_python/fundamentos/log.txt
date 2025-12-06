@@ -1,0 +1,8 @@
+2025-12-06 10:14:58 | exibir_extrato | args=(0.0,) | kwargs={'transacoes': []} | retorno=None
+2025-12-06 10:15:07 | depositar | args=(0.0, 1000.0, [{'tipo': 'Depósito', 'valor': 1000.0, 'data': '06-12-2025 10:15:07'}]) | kwargs={} | retorno=1000.0
+2025-12-06 10:15:12 | exibir_extrato | args=(1000.0,) | kwargs={'transacoes': [{'tipo': 'Depósito', 'valor': 1000.0, 'data': '06-12-2025 10:15:07'}]} | retorno=None
+2025-12-06 10:18:05 | criar_usuario | args=([{'nome': 'Teste teste', 'data_nascimento': '23/12/1945', 'cpf': '1234567890', 'endereco': 'Rua Teste, 123 - Teste Centro - Teste City'}],) | kwargs={} | retorno=None
+2025-12-06 10:18:27 | criar_conta | args=('0001', 1, [{'nome': 'Teste teste', 'data_nascimento': '23/12/1945', 'cpf': '1234567890', 'endereco': 'Rua Teste, 123 - Teste Centro - Teste City'}], [{'agencia': '0001', 'numero': 1, 'usuario': {'nome': 'Teste teste', 'data_nascimento': '23/12/1945', 'cpf': '1234567890', 'endereco': 'Rua Teste, 123 - Teste Centro - Teste City'}, 'saldo': 0.0, 'transacoes': []}]) | kwargs={} | retorno=None
+2025-12-06 10:18:39 | depositar | args=(0.0, 1000.0, [{'tipo': 'Depósito', 'valor': 1000.0, 'data': '06-12-2025 10:18:39'}]) | kwargs={} | retorno=1000.0
+2025-12-06 10:18:41 | exibir_extrato | args=(1000.0,) | kwargs={'transacoes': [{'tipo': 'Depósito', 'valor': 1000.0, 'data': '06-12-2025 10:18:39'}]} | retorno=None
+2025-12-06 10:18:54 | sacar | args=() | kwargs={'saldo': 1000.0, 'valor': 100.0, 'transacoes': [{'tipo': 'Depósito', 'valor': 1000.0, 'data': '06-12-2025 10:18:39'}, {'tipo': 'Saque', 'valor': 100.0, 'data': '06-12-2025 10:18:54'}], 'limite': 500.0, 'numero_saques': 0, 'limite_saques': 3} | retorno=(900.0, 1)
