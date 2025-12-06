@@ -133,6 +133,7 @@ while True:
 import functools
 from datetime import datetime
 from typing import List, Dict, Generator
+from luiza_labs_backend_python.fundamentos.desafio_02 import log_transacao
 
 MENU = """
 [d] Depositar
@@ -146,7 +147,6 @@ MENU = """
 
 AGENCIA_PADRAO = "0001"
 LIMITE_SAQUES = 3
-
 
 @log_transacao
 def depositar(saldo: float, valor: float, transacoes: List[Dict], /):
@@ -292,19 +292,6 @@ def listar_contas_com_iterador(contas: List[Dict]):
 # Iterador personalizado
 # Implemente um iterador personalizado ContaIterador que permita iterar sobre todas as contas
 # de banco, retornando informações básicas de cada conta (número, saldo atual, etc).
-
-def log_transacao(func):
-    """
-    Decorador que registra a data, hora e nome da função executada.
-    """
-    @functools.wraps(func)
-    def envelope(*args, **kwargs):
-        data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        resultado = func(*args, **kwargs)
-        print(f"\n[LOG] {data_hora} - Função '{func.__name__}' executada.")
-        return resultado
-
-    return envelope
 
 def gerador_relatorios(transacoes: List[Dict], tipo_filtro: str = None) -> Generator:
     """
