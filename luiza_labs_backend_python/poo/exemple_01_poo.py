@@ -1,38 +1,42 @@
-class Bicicleta:
-    def __init__(self, cor, modelo, ano, valor):
-        self.cor = cor
-        self.modelo = modelo
-        self.ano = ano
-        self.valor = valor
+class Bicycle:
+    def __init__(self, color, model, year, value):
+        self.color = color
+        self.model = model
+        self.year = year
+        self.value = value
 
-    def buzinar(self):
+    @staticmethod
+    def honk():
         print("Trim trim...")
 
-    def parar(self):
-        print("Parando bicicleta...")
-        print("Bicicleta parada!")
+    @staticmethod
+    def stop():
+        print("Stop bicyle...")
+        print("Bicycle stoped!")
 
-    def correr(self):
+    @staticmethod
+    def run():
         print("Vrummmm...")
 
-    def trocar_marcha(self, numero_marcha):
-        print(f"Marcha trocada para {numero_marcha}")
+    @staticmethod
+    def change_gear(gear_number):
+        print(f"Gear shifted to {gear_number}")
 
     # def __str__(self):
-    # return f"Bicicleta: cor = {self.cor}, modelo = {self.modelo}, ano = {self.ano}, valor = {self.valor}"
+    # return f"Bicycle: color = {self.color}, model = {self.model}, year = {self.year}, value = {self.value}"
 
     def __str__(self):
-        return f"{self.__class__.__name__}: {', '.join([f'{chave}={valor}' for chave, valor in self.__dict__.items()])}"
+        return f"{self.__class__.__name__}: {', '.join([f'{key}={value}' for key, value in self.__dict__.items()])}"
 
 
-bicicleta1 = Bicicleta(cor="Prata", modelo="JNA 1", ano=2001, valor=150)
-bicicleta1.buzinar()
-bicicleta1.correr()
-bicicleta1.parar()
-print(bicicleta1.cor, bicicleta1.modelo, bicicleta1.ano, bicicleta1.valor)
+bicycle1 = Bicycle(color="Silver", model="JNA 1", year=2001, value=150)
+bicycle1.honk()
+bicycle1.run()
+bicycle1.stop()
+print(bicycle1.color, bicycle1.model, bicycle1.year, bicycle1.value)
 
-# Quando fazemos essa chamada:
-# bicicleta1.buzinar é equivalente a Bicicleta.buzinar(bicicleta1)
+# When we make this call:
+# bicycle1.honk is equivalent to Bicycle.honk(bicycle1)
 
-bicicleta2 = Bicicleta(cor="Verde", modelo="Monark", ano=1995, valor=50)
-print(bicicleta2)
+bicycle2 = Bicycle(color="Green", model="Monark", year=1995, value=50)
+print(bicycle2)
