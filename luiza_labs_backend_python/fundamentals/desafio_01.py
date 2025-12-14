@@ -132,7 +132,7 @@ while True:
 
 from datetime import datetime
 from typing import List, Dict, Generator
-from luiza_labs_backend_python.fundamentos.desafio_02 import log_transacao
+from luiza_labs_backend_python.fundamentals.desafio_02 import log_transacao
 
 MENU = """
 [d] Depositar
