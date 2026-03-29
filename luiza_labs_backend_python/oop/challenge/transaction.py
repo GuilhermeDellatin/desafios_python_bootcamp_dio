@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bank_account import BankAccount
+    from bank_account import BankAccount, OperationResult
 
 
 class Transaction(ABC):
@@ -16,7 +16,7 @@ class Transaction(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def register(self, account: BankAccount) -> None:
+    def register(self, account: BankAccount) -> OperationResult:
         raise NotImplementedError
 
 
@@ -30,10 +30,11 @@ class Deposit(Transaction):
     def value(self) -> float:
         return self._value
 
-    def register(self, account: BankAccount) -> None:
-        success = account.deposit(self.value)
-        if success:
+    def register(self, account: BankAccount) -> OperationResult:
+        result = account.deposit(self.value)
+        if result.success:
             account.history.add_transaction(self)
+        return result
 
 
 class Withdrawal(Transaction):
@@ -46,7 +47,8 @@ class Withdrawal(Transaction):
     def value(self) -> float:
         return self._value
 
-    def register(self, account: BankAccount) -> None:
-        success = account.withdraw(self.value)
-        if success:
+    def register(self, account: BankAccount) -> OperationResult:
+        result = account.withdraw(self.value)
+        if result.success:
             account.history.add_transaction(self)
+        return result

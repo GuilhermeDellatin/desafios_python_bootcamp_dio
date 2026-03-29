@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bank_account import BankAccount
+    from bank_account import BankAccount, OperationResult
     from transaction import Transaction
 
 
@@ -16,8 +16,8 @@ class BankClient:
 
     def perform_transaction(
         self, account: BankAccount, transaction: Transaction
-    ) -> None:
-        transaction.register(account)
+    ) -> OperationResult:
+        return transaction.register(account)
 
     def add_account(self, account: BankAccount) -> None:
         self.accounts.append(account)
@@ -26,9 +26,7 @@ class BankClient:
 class Individual(BankClient):
     """Represents a natural person client."""
 
-    def __init__(
-        self, cpf: str, name: str, birth_date: str, address: str
-    ) -> None:
+    def __init__(self, cpf: str, name: str, birth_date: str, address: str) -> None:
         super().__init__(address)
         self.cpf = cpf
         self.name = name

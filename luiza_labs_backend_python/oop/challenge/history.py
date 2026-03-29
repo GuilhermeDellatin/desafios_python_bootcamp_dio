@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
@@ -20,14 +20,14 @@ class History:
         self._transactions: list[TransactionRecord] = []
 
     @property
-    def transactions(self) -> list[TransactionRecord]:
-        return self._transactions
+    def transactions(self) -> tuple[TransactionRecord, ...]:
+        return tuple(self._transactions)
 
     def add_transaction(self, transaction: Transaction) -> None:
         self._transactions.append(
             {
                 "type": transaction.__class__.__name__,
                 "value": transaction.value,
-                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "date": datetime.now(tz=UTC).isoformat(timespec="seconds"),
             }
         )

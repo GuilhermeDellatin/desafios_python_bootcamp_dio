@@ -1,11 +1,20 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from history import History
 
 if TYPE_CHECKING:
     from bank_client import BankClient
+
+
+@dataclass(frozen=True, slots=True)
+class OperationResult:
+    """Represents the outcome of a banking operation."""
+
+    success: bool
+    message: str
 
 
 class BankAccount:
@@ -42,27 +51,28 @@ class BankAccount:
     def history(self) -> History:
         return self._history
 
-    def withdraw(self, value: float) -> bool:
+    def withdraw(self, value: float) -> OperationResult:
         if value <= 0:
-            print("\nError: The withdrawal amount must be greater than zero.")
-            return False
+            return OperationResult(
+                success=False,
+                message="Error: The withdrawal amount must be greater than zero.",
+            )
 
         if value > self._balance:
-            print("\nError: Insufficient funds.")
-            return False
+            return OperationResult(success=False, message="Error: Insufficient funds.")
 
         self._balance -= value
-        print("\nWithdrawal successful!")
-        return True
+        return OperationResult(success=True, message="Withdrawal successful!")
 
-    def deposit(self, value: float) -> bool:
+    def deposit(self, value: float) -> OperationResult:
         if value <= 0:
-            print("\nError: The deposit amount must be greater than zero.")
-            return False
+            return OperationResult(
+                success=False,
+                message="Error: The deposit amount must be greater than zero.",
+            )
 
         self._balance += value
-        print("\nDeposit successful!")
-        return True
+        return OperationResult(success=True, message="Deposit successful!")
 
 
 class CheckingAccount(BankAccount):
@@ -91,7 +101,7 @@ class CheckingAccount(BankAccount):
     def withdrawal_limit(self) -> int:
         return self._withdrawal_limit
 
-    def withdraw(self, value: float) -> bool:
+    def withdraw(self, value: float) -> OperationResult:
         withdrawals_count = sum(
             1
             for transaction in self.history.transactions
@@ -99,19 +109,19 @@ class CheckingAccount(BankAccount):
         )
 
         if value > self.limit:
-            print("\nError: Amount exceeds per-withdrawal limit.")
-            return False
+            return OperationResult(
+                success=False,
+                message="Error: Amount exceeds per-withdrawal limit.",
+            )
 
         if withdrawals_count >= self.withdrawal_limit:
-            print("\nError: Maximum number of withdrawals reached.")
-            return False
+            return OperationResult(
+                success=False,
+                message="Error: Maximum number of withdrawals reached.",
+            )
 
         return super().withdraw(value)
 
     def __str__(self) -> str:
         holder = getattr(self.client, "name", "N/A")
-        return (
-            f"Agency:\t{self.branch}\n"
-            f"Account:\t{self.number}\n"
-            f"Holder:\t{holder}"
-        )
+        return f"Agency:\t{self.branch}\nAccount:\t{self.number}\nHolder:\t{holder}"
