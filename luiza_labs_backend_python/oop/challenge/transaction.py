@@ -1,38 +1,52 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bank_account import BankAccount
 
 
 class Transaction(ABC):
+    """Interface for financial transactions."""
+
     @property
     @abstractmethod
-    def value(self):
-        pass
+    def value(self) -> float:
+        raise NotImplementedError
 
-    @classmethod
-    def register(cls, bank_account):
-        pass
+    @abstractmethod
+    def register(self, account: BankAccount) -> None:
+        raise NotImplementedError
+
 
 class Deposit(Transaction):
-    def __init__(self, value):
+    """Handles deposit transactions."""
+
+    def __init__(self, value: float) -> None:
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> float:
         return self._value
 
-    def register(self, bank_account):
-        success = bank_account.deposit(self._value)
+    def register(self, account: BankAccount) -> None:
+        success = account.deposit(self.value)
         if success:
-            bank_account.history.add_transaction(self)
+            account.history.add_transaction(self)
 
-class Withdraw(Transaction):
-    def __init__(self, value):
+
+class Withdrawal(Transaction):
+    """Handles withdrawal transactions."""
+
+    def __init__(self, value: float) -> None:
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> float:
         return self._value
 
-    def register(self, bank_account):
-        success = bank_account.withdraw(self._value)
+    def register(self, account: BankAccount) -> None:
+        success = account.withdraw(self.value)
         if success:
-            bank_account.history.add_transaction(self)
+            account.history.add_transaction(self)
